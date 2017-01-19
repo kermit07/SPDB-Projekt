@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>SPDB Projekt - Linie</title>
+        <meta charset="UTF-8"> 
+
+        <title>SPDB Projekt - Odcinki</title>
 
         <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="https://openlayers.org/en/v3.20.1/css/ol.css">
@@ -18,22 +20,14 @@
         <div class="main-container">
             <div class="header" style="display: table; width: 100%;">
                 <div style="display: table-row;">
-                    <div style="display: table-cell; width: 300px;">
-                        <h3 style="margin: 0;">Opóźnienia według linii</h3>
+                    <div style="display: table-cell; width: 600px;">
+                        <h3 style="margin: 0;">Odcinki, na których najczęściej dochodzi do opóźnień</h3>
                     </div>
                     <div style="display: table-cell;">
                         <a href="index.html">Powrót</a>
                     </div>
                     <div style="display: table-cell;">
-                        <label for="lineSelect">Linia:</label>
-                        <select id="lineSelect" onchange="onLineSelected(this.value)">
-                            <option value="-1">Wybierz linię</option>
-                        </select>
 
-                        <label for="variantSelect" style="margin-left: 20px;">Wariant:</label>
-                        <select id="variantSelect" onchange="onVariantSelected(this.value)">
-                            <option value="-1">Wybierz wariant</option>
-                        </select>
                     </div>
                 </div>
             </div>
@@ -89,53 +83,16 @@
 
 <script>
     function init() {
-        loadLines();
+        loadSections();
     }
 
-    function loadLines() {
+    function loadSections() {
         toggleLoader();
-        $.get("lines.php", function(data) {
-            data.forEach(function(line) {
-                $('#lineSelect').append($('<option>', {
-                    value: line.loid,
-                    text: line.name
-                }));
-            });
+        startTimer();
+        $.get("sections.php", function(data) {
+            console.log(data);                  // TODO draw sections
             toggleLoader();
         });
-    }
-
-    function onLineSelected(lineLoid) {
-        if(lineLoid != -1) {
-            toggleLoader();
-            startTimer();
-            $.get("variants.php", {line_loid: lineLoid}, function(data) {
-                $('#variantSelect').empty();
-                $('#variantSelect').append($('<option>', {
-                    value: -1,
-                    text: 'Wybierz wariant'
-                }));
-
-                data.forEach(function(variant) {
-                    $('#variantSelect').append($('<option>', {
-                        value: variant.loid,
-                        text: variant.loid + ' (' + variant.day_stops + ')'
-                    }));
-                });
-                toggleLoader();
-            });
-        }
-    }
-
-    function onVariantSelected(variantLoid) {
-        if(variantLoid != -1) {
-            toggleLoader();
-            startTimer();
-            $.get("variant.php", {variant_loid: variantLoid}, function(data) {
-                draw(data)
-                toggleLoader();
-            });
-        }
     }
 
     function toggleLoader() {
