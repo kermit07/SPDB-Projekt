@@ -68,12 +68,14 @@ function loadMarkers(data) {
 			color = numberToColorHsl(parseFloat(data[i].avg_delay), 0, 15 * 60);
 		}
 		markers[i] = {coordinates: crd, delayRate: dRate, delayAvg: dAvg, stopName: data[i].name};
-		colors[i] = color;
+		if(i > 0) // przesunięcie ponieważ rysuje linie inaczej niż byśmy chcieli
+			colors[i-1] = color;
     }
+	color[data.length - 1] = "#FFFFFF"
 }
 
 
-var styleFunction = function(feature, resolution) {
+var lineStyleFunction = function(feature, resolution) {
 	var styles = [];
 
     var i = 0, geometry = feature.getGeometry();
@@ -147,7 +149,7 @@ function drawLines() {
                 name: 'Line'
             })]
         }),
-        style: styleFunction
+        style: lineStyleFunction
     });
     map.addLayer(layerLines);
 }
