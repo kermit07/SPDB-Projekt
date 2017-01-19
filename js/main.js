@@ -38,7 +38,6 @@ function hslToRgb(h, s, l){
 
 function numberToColorHsl(val, minVal, maxVal) {
 	var i = val / (maxVal - minVal) + minVal;
-	console.log(i)
     // as the function expects a value between 0 and 1, and red = 0° and green = 120°
     // we convert the input to the appropriate hue value
     var hue = (1 - i) * 80 / 360;
@@ -50,8 +49,13 @@ function numberToColorHsl(val, minVal, maxVal) {
 
 var markers = [];
 var colors = [];
+var layerLines = [];
+var layerFirstPoint = [];
+var layerPoints = [];
+var layerLastPoint = [];
 
 function loadMarkers(data) {
+	markers = [];
     for (var i = 0; i < data.length; i++) {
         var x = parseFloat(data[i].longitude);
         var y = parseFloat(data[i].latitude);
@@ -95,9 +99,48 @@ var styleFunction = function(feature, resolution) {
     return styles;
 }
 
+var firstPointStyleFunction = function(feature, resolution) {
+	
+	return [
+		new ol.style.Style({
+			image: new ol.style.Circle({
+				fill:new ol.style.Fill({color: "green"}),
+				stroke: new ol.style.Stroke({color: 'black', width: 1}),
+				radius: 4
+			})
+		})
+	];
+}
+
+var pointsStyleFunction = function(feature, resolution) {
+	
+	return [
+		new ol.style.Style({
+			image: new ol.style.Circle({
+				fill:new ol.style.Fill({color: "white"}),
+				stroke: new ol.style.Stroke({color: 'black', width: 1}),
+				radius: 4
+			})
+		})
+	];
+}
+
+var lastPointStyleFunction = function(feature, resolution) {
+	
+	return [
+		new ol.style.Style({
+			image: new ol.style.Circle({
+				fill:new ol.style.Fill({color: "red"}),
+				stroke: new ol.style.Stroke({color: 'black', width: 1}),
+				radius: 4
+			})
+		})
+	];
+}
+
 function drawLines() {
 	var coordinates = markers.map(function(a) {return a.coordinates;});
-    var layerLines = new ol.layer.Vector({
+    layerLines = new ol.layer.Vector({
         source: new ol.source.Vector({
             features: [new ol.Feature({
                 geometry: new ol.geom.LineString(coordinates, 'XY'),
@@ -110,8 +153,25 @@ function drawLines() {
 }
 
 function drawPoints() {
+	var firstPointsFeature = [
+		new ol.Feature({
+			geometry: new ol.geom.Point(markers[0].coordinates),
+			stopName: markers[0].stopName,
+			delayRate: markers[0].delayRate,
+			delayAvg: markers[0].delayAvg
+		})
+	];
+	var lastPointsFeature = [
+		new ol.Feature({
+			geometry: new ol.geom.Point(markers[markers.length - 1].coordinates),
+			stopName: markers[markers.length - 1].stopName,
+			delayRate: markers[markers.length - 1].delayRate,
+			delayAvg: markers[markers.length - 1].delayAvg
+		})
+	];
+	
     var pointsFeatures = [];
-    for (var i = 0; i < markers.length; i++) {
+    for (var i = 1; i < markers.length - 1; i++) {
         pointsFeatures.push(
             new ol.Feature({
                 geometry: new ol.geom.Point(markers[i].coordinates),
@@ -122,18 +182,42 @@ function drawPoints() {
         );
     }
 
-    var layerPoints = new ol.layer.Vector({
+    layerFirstPoint = new ol.layer.Vector({
         source: new ol.source.Vector({
-            features: pointsFeatures
-        })
+            features: firstPointsFeature
+        }),
+		style: firstPointStyleFunction
     });
 
+    layerPoints = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: pointsFeatures
+        }),
+		style: pointsStyleFunction
+    });
+
+    layerLastPoint = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: lastPointsFeature
+        }),
+		style: lastPointStyleFunction
+    });
+
+    map.addLayer(layerFirstPoint);
     map.addLayer(layerPoints);
+    map.addLayer(layerLastPoint);
 }
 
 function draw(data) {
     loadMarkers(data);
-
+	if(layerLines)
+		map.removeLayer(layerLines);
+	if(layerFirstPoint)
+		map.removeLayer(layerFirstPoint);
+	if(layerPoints)
+		map.removeLayer(layerPoints);
+	if(layerLastPoint)
+		map.removeLayer(layerLastPoint);
     drawLines();
     drawPoints();
 }
@@ -174,10 +258,6 @@ map.on('click', function(evt) {
 
 // change mouse cursor when over marker
 map.on('pointermove', function(e) {
-    if (e.dragging) {
-        $(element).popover('destroy');
-        return;
-    }
     var pixel = map.getEventPixel(e.originalEvent);
     var hit = false;
 	map.forEachFeatureAtPixel(pixel, function (feature) {
