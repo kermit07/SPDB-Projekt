@@ -64,7 +64,7 @@
     
     function startTimer() {
         totalSeconds = 0;
-        setInterval(setTime, 1000);
+        return setInterval(setTime, 1000);
     }
 
     function setTime()
@@ -109,7 +109,7 @@
     function onLineSelected(lineLoid) {
         if(lineLoid != -1) {
             toggleLoader();
-            startTimer();
+            var timer = startTimer();
             $.get("variants.php", {line_loid: lineLoid}, function(data) {
                 $('#variantSelect').empty();
                 $('#variantSelect').append($('<option>', {
@@ -124,6 +124,7 @@
                     }));
                 });
                 toggleLoader();
+                clearInterval(timer);
             });
         }
     }
@@ -131,10 +132,11 @@
     function onVariantSelected(variantLoid) {
         if(variantLoid != -1) {
             toggleLoader();
-            startTimer();
+            var timer = startTimer();
             $.get("variant.php", {variant_loid: variantLoid}, function(data) {
                 draw(data)
                 toggleLoader();
+                clearInterval(timer);
             });
         }
     }

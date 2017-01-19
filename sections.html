@@ -27,7 +27,24 @@
                         <a href="index.html">Powrót</a>
                     </div>
                     <div style="display: table-cell;">
+                        <label for="daySelect">Dzień tygodnia:</label>
+                        <select id="daySelect">
+                            <option value="-1">Wybierz dzień</option>
+                            <option value="1">Poniedziałek</option>
+                            <option value="2">Wtorek</option>
+                            <option value="3">Środa</option>
+                            <option value="4">Czwartek</option>
+                            <option value="5">Piątek</option>
+                            <option value="6">Sobota</option>
+                            <option value="0">Niedziela</option>
+                        </select>
 
+                        <label for="hourRangeSelect" style="margin-left: 20px;">Przedział godzinowy:</label>
+                        <select id="hourRangeSelect">
+                            <option value="-1">Wybierz przedział</option>
+                        </select>
+
+                        <button type="button" onclick="loadData()" style="margin-left: 20px;">Załaduj dane</button>
                     </div>
                 </div>
             </div>
@@ -47,7 +64,8 @@
             </div>
         </div>
     </body>
-    <script src="js/main.js"></script>
+    <script src="js/main-2.js"></script>
+    <script src="js/utils.js"></script>
 </html>
 
 <script type="text/javascript">
@@ -57,7 +75,7 @@
     
     function startTimer() {
         totalSeconds = 0;
-        setInterval(setTime, 1000);
+        return setInterval(setTime, 1000);
     }
 
     function setTime()
@@ -83,16 +101,35 @@
 
 <script>
     function init() {
-        loadSections();
+        setupHourRanges();
     }
 
-    function loadSections() {
-        toggleLoader();
-        startTimer();
-        $.get("sections.php", function(data) {
-            console.log(data);                  // TODO draw sections
+    function setupHourRanges() {
+        for(var i = 0; i < 24; i = i + 2) {
+            $('#hourRangeSelect').append($('<option>', {
+                value: i,
+                text: i + ' - ' + (i+2)
+            }));
+        }
+    }
+
+    function loadData() {
+        var startHour = $("#hourRangeSelect").val();
+        var day = $("#daySelect").val();
+
+        if(startHour != -1 || day != -1) {
             toggleLoader();
-        });
+            var timer = startTimer();
+            $.get("sections.php", {start_hour: startHour, end_hour: startHour+2, day: day}, function(data) {
+                draw(data);
+                toggleLoader();
+                clearInterval(timer);
+            });
+        } else {
+            $.getJSON("data/sections_delays.json", function(data) {
+                draw(data);
+            });
+        }
     }
 
     function toggleLoader() {
