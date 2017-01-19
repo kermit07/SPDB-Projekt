@@ -114,8 +114,8 @@
     }
 
     function loadData() {
-        var startHour = $("#hourRangeSelect").val();
-        var day = $("#daySelect").val();
+        var startHour = parseInt($("#hourRangeSelect").val());
+        var day = parseInt($("#daySelect").val());
 
         if(startHour != -1 || day != -1) {
             toggleLoader();
