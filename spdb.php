@@ -26,8 +26,13 @@
 <body onload="init()">
     <div style="margin: 20px;">
         <label for="lineSelect">Linia:</label>
-        <select id="lineSelect">
+        <select id="lineSelect" onchange="onLineSelected(this.value)">
             <option value="-1">Wybierz linię</option>
+        </select>
+
+        <label for="variantSelect" style="margin-left: 20px;">Wariant:</label>
+        <select id="variantSelect" onchange="onVariantSelected(this.value)">
+            <option value="-1">Wybierz wariant</option>
         </select>
     </div>
   <div id="map" class="map"></div>
@@ -40,6 +45,10 @@
 
 <script>
     function init() {
+        loadLines();
+    }
+
+    function loadLines() {
         $.get("lines.php", function(data) {
             data.forEach(function(line) {
                 $('#lineSelect').append($('<option>', {
@@ -48,10 +57,33 @@
                 }));
             });
         });
+    }
 
-        $.get("variant.php", function(data) {
-            draw(data)
-        });
+    function onLineSelected(lineLoid) {
+        if(lineLoid != -1) {
+            $.get("variants.php", {line_loid: lineLoid}, function(data) {
+                $('#variantSelect').empty();
+                $('#variantSelect').append($('<option>', {
+                    value: -1,
+                    text: 'Wybierz wariant'
+                }));
+
+                data.forEach(function(variant) {
+                    $('#variantSelect').append($('<option>', {
+                        value: variant.loid,
+                        text: '(' + variant.day_stops + ') ' + variant.logicalkey
+                    }));
+                });
+            });
+        }
+    }
+
+    function onVariantSelected(variantLoid) {
+        if(variantLoid != -1) {
+            $.get("variant.php", {variant_loid: variantLoid}, function(data) {
+                draw(data)
+            });
+        }
     }
 </script>
 >>>>>>> Dodanie wyboru linii autobusowej
