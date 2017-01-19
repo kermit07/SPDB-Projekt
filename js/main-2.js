@@ -24,17 +24,15 @@ function loadDbResults(data) {
         var y = parseFloat(data[i].latitude);
         var prevCrd = ol.proj.transform([prevX, prevY], 'EPSG:4326', 'EPSG:3857')
         var crd = ol.proj.transform([x, y], 'EPSG:4326', 'EPSG:3857')
-		console.log("prevCrd: " + prevY + ", " + prevX)
-		console.log("crd: " + y + ", " + x)
 		var dRate = Math.round(data[i].delay_rate) + "%";
-		var dAvg = "bd";
 		var color = "rgb(255,255,255)";
-		if(data[i].avg_delay != null) {
+		if (data[i].delay_rate != null)
+			color = numberToColorHsl(parseFloat(data[i].delay_rate), 0, 30); // range 0-30%
+		var dAvg = "bd";
+		if(data[i].avg_delay != null)
 			dAvg = Math.floor(parseFloat(data[i].avg_delay)/60) + " min " + Math.floor(parseFloat(data[i].avg_delay)%60) + " sec";
-			color = numberToColorHsl(parseFloat(data[i].avg_delay), 0, 15 * 60);
-		}
-		dbResults[i] = {prevCrd: prevCrd, crd: crd, delayRate: dRate, delayAvg: dAvg, stopName: data[i].name};
-		console.log(color)
+		dbResults[i] = {prevCrd: prevCrd, crd: crd, delayRate: dRate, delayAvg: dAvg, prevStopName: data[i].prev_name, stopName: data[i].name};
+		colors[i] = color;
     }
 }
 
@@ -45,13 +43,14 @@ var arrayStyleFunction = function(feature) {
 	  // linestring
 	  new ol.style.Style({
 		stroke: new ol.style.Stroke({
-		  color: '#FF0000',
-		  width: 2
+		  color: feature.get('color'),
+		  width: 4
 		})
 	  })
 	];
 
 	geometry.forEachSegment(function(start, end) {
+	console.log("forEachSegment")
 	  var dx = end[0] - start[0];
 	  var dy = end[1] - start[1];
 	  var rotation = Math.atan2(dy, dx);
@@ -79,8 +78,10 @@ function drawLines() {
 				features: [new ol.Feature({
 					geometry: new ol.geom.LineString(coordinates, 'XY'),
 					stopName: dbResults[i].stopName,
+					prevStopName: dbResults[i].prevStopName,
 					delayRate: dbResults[i].delayRate,
-					delayAvg: dbResults[i].delayAvg
+					delayAvg: dbResults[i].delayAvg,
+					color: colors[i]
 					
 				})]
 			}),
@@ -120,7 +121,7 @@ map.on('click', function(evt) {
         }
     );
     if (feature && feature.getGeometry() instanceof ol.geom.LineString) {
-		actualPopupContent = feature.get('stopName') + "<br/>"
+		actualPopupContent = feature.get('stopName') + " - " + feature.get('prevStopName') + "<br/>"
 		                     + "Prawdopodobieństo opóźnienia: " + feature.get('delayRate') + "<br/>"
 							 + "Średni czas opóźnienia: " + feature.get('delayAvg');
         popup.setPosition(evt.coordinate);

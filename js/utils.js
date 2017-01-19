@@ -24,6 +24,8 @@ function hslToRgb(h, s, l){
 }
 
 function numberToColorHsl(val, minVal, maxVal) {
+	if(val > maxVal)
+		return 'rgb(0,0,0)';
 	var i = val / (maxVal - minVal) + minVal;
     // as the function expects a value between 0 and 1, and red = 0° and green = 120°
     // we convert the input to the appropriate hue value
