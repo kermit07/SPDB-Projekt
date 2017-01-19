@@ -1,4 +1,4 @@
-var raster = new ol.layer.Tile({
+﻿var raster = new ol.layer.Tile({
     source: new ol.source.OSM()
 });
 
@@ -11,8 +11,45 @@ var map = new ol.Map({
     })
 });
 
+function hslToRgb(h, s, l){
+    var r, g, b;
+
+    if(s == 0){
+        r = g = b = l; // achromatic
+    }else{
+        var hue2rgb = function hue2rgb(p, q, t){
+            if(t < 0) t += 1;
+            if(t > 1) t -= 1;
+            if(t < 1/6) return p + (q - p) * 6 * t;
+            if(t < 1/2) return q;
+            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        }
+
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function numberToColorHsl(val, minVal, maxVal) {
+	var i = val / (maxVal - minVal) + minVal;
+	console.log(i)
+    // as the function expects a value between 0 and 1, and red = 0° and green = 120°
+    // we convert the input to the appropriate hue value
+    var hue = (1 - i) * 80 / 360;
+    // we convert hsl to rgb (saturation 100%, lightness 50%)
+    var rgb = hslToRgb(hue, 1, .5);
+    
+    return 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')'; 
+}
 
 var markers = [];
+var colors = [];
 
 function loadMarkers(data) {
     for (var i = 0; i < data.length; i++) {
@@ -21,10 +58,41 @@ function loadMarkers(data) {
         var crd = ol.proj.transform([x, y], 'EPSG:4326', 'EPSG:3857')
 		var dRate = Math.round(data[i].delay_rate) + "%";
 		var dAvg = "bd";
-		if(data[i].avg_delay != null)
+		var color = "rgb(255,255,255)";
+		if(data[i].avg_delay != null) {
 			dAvg = Math.floor(parseFloat(data[i].avg_delay)/60) + " min " + Math.floor(parseFloat(data[i].avg_delay)%60) + " sec";
+			color = numberToColorHsl(parseFloat(data[i].avg_delay), 0, 15 * 60);
+		}
 		markers[i] = {coordinates: crd, delayRate: dRate, delayAvg: dAvg, stopName: data[i].name};
+		colors[i] = color;
     }
+}
+
+
+var styleFunction = function(feature, resolution) {
+	var styles = [];
+
+    var i = 0, geometry = feature.getGeometry();
+
+    geometry.forEachSegment(function (start, end) {
+
+        color = colors[i];
+
+        styles.push(new ol.style.Style({
+            geometry: new ol.geom.LineString([start, end]),
+            fill: new ol.style.Fill({
+                color: color
+            }),
+            stroke: new ol.style.Stroke({
+                color: color,
+                width: 4
+            })
+        }));
+
+        i++;
+    });
+
+    return styles;
 }
 
 function drawLines() {
@@ -36,11 +104,7 @@ function drawLines() {
                 name: 'Line'
             })]
         }),
-        style: new ol.style.Style({
-            stroke: new ol.style.Stroke(({
-                width: 4
-            }))
-        })
+        style: styleFunction
     });
     map.addLayer(layerLines);
 }
