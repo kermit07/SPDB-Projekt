@@ -1,42 +1,24 @@
-<?php
-include("db_config.php");
-
-$conn = pg_pconnect("host=" . $host . " dbname=" . $database . " user=" . $username . " password=" . $password);
-if (!$conn) {
-  echo "Could not connect to database!\n";
-  exit;
-}
-
-$vid = 41089;
-$result = pg_query($conn, "SELECT vs.loid, vs.distancefromschedule, vs.orderinvariant, sp.loid AS sp_loid, sp.latitude, sp.longitude, sp.name, delay.total, delay.delayed, delay.not_delayed, delay.avg_delay, delay.delay_rate FROM csipvariantstopping vs LEFT JOIN csipstoppoint sp ON sp.loid = vs.stoppoint_loid LEFT JOIN ( SELECT vs.loid AS vs_loid, COUNT(*) AS total, COUNT(ds.delaysec) AS delayed, COUNT(*) - COUNT(ds.delaysec) AS not_delayed, AVG(ds.delaysec) AS avg_delay, (COUNT(ds.delaysec) :: FLOAT / COUNT(*)) * 100 AS delay_rate FROM csipvariantstopping vs LEFT JOIN csipcoursestopping cs ON cs.variantstopping_loid = vs.loid LEFT JOIN csipdaystopping ds ON ds.stopping_loid = cs.loid WHERE (ds.delaysec IS NULL OR (ds.delaysec > 0 AND ds.delaysec < 1.5 * 60 * 60 AND ds.delaysec > -1.5 * 60 * 60) ) AND vs.variant_loid = ".$vid." GROUP BY vs.loid ) AS delay ON delay.vs_loid = vs.loid WHERE vs.variant_loid = ".$vid);
-
-if (!$result) {
-  echo "Could not perform query!\n";
-  exit;
-}
-
-$resultArray = pg_fetch_all($result);
-$jsonArray = json_encode($resultArray);
-?>
-
 <!DOCTYPE html>
 <html>
   <head>
-    <title>SPDB Projekt</title>
+    <title>LineString Arrows</title>
+	<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://openlayers.org/en/v3.20.1/css/ol.css" type="text/css">
+	
     <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
     <script src="https://openlayers.org/en/v3.20.1/build/ol.js"></script>
+	
+	<style media="screen" type="text/css">
+	  .popover-content {
+		width: 280px;
+	  }
+	</style>
   </head>
   <body>
-    <div id="map" class="map"></div>
-    <script src="js/main.js"></script>
+    <div id="map" class="map"><div id="popup"></div></div>
   </body>
+  <script src="js/main.js"></script>
 </html>
-
-
-<script>
-var obj = JSON.parse('<?php echo $jsonArray; ?>');
-console.log(obj)
-draw(obj)
-</script>
