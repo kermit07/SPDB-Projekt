@@ -1,22 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>LineString Arrows</title>
-    <link rel="stylesheet" href="https://openlayers.org/en/v3.20.1/css/ol.css" type="text/css">
-    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
-    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
-    <script src="https://openlayers.org/en/v3.20.1/build/ol.js"></script>
-  </head>
-  <body>
-    <div id="map" class="map"></div>
-    <script src="js/main.js"></script>
-  </body>
-</html>
-	
-
 <?php
+include("db_config.php");
 
-$conn = pg_pconnect("host=localhost dbname=mydb user=postgres password=asdasd");
+$conn = pg_pconnect("host=" . $host . " dbname=" . $database . " user=" . $username . " password=" . $password);
 if (!$conn) {
   echo "An error occurred1.\n";
   exit;
@@ -32,6 +17,21 @@ if (!$result) {
 $resultArray = pg_fetch_all($result);
 $jsonArray = json_encode($resultArray);
 ?>
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SPDB Projekt</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v3.20.1/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v3.20.1/build/ol.js"></script>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <script src="js/main.js"></script>
+  </body>
+</html>
 
 
 <script>
