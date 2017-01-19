@@ -74,7 +74,7 @@
                 data.forEach(function(variant) {
                     $('#variantSelect').append($('<option>', {
                         value: variant.loid,
-                        text: variant.logicalkey
+                        text: variant.loid + ' (' + variant.day_stops + ')'
                     }));
                 });
                 toggleLoader();
