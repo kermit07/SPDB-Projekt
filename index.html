@@ -13,22 +13,40 @@
     </head>
     <body>
         <main style="width: 800px; margin: 0 auto;">
-            <header>
-                <h1>Projekt SPDB</h1>
-                <h2>Analiza opóźnień i przyspieszeń</h2>
+            <header class="page-header" style="text-align: center;">
+                <h2>Projekt SPDB</h2>
+                <h3>Analiza opóźnień i przyspieszeń</h3>
             </header>
-            
-            <nav>
-                Menu
-                <ul>
-                    <li>
-                        <a href="sections.html">Analiza opóźnień i przyspieszeń na odcinkach</a>
-                    </li>
-                    <li>
-                        <a href="spdb.php">Analiza opóźnień i przyspieszeń na wybranej linii</a>
-                    </li>
-                </ul>
-            </nav>
+
+            <div>
+                <p>Aplikacja służy do wizualizacji i analizy opóźnień/przyspieszeń w komunikacji
+                miejskiej w Białymstoku. Aplikacja składa się z dwóch modułów.</p>
+
+                <p>Pierwszy z nich umożliwia wykrycie odcinków, na których najczęściej dochodzi do opóźnień. Wyświetlanych jest 200 odcinków, dla których procent przyjazdów z opóźnieniem jest największy. W obliczeniach brane są pod uwagę wszystkie przejazdy wszystkich kursów po rozważanym odcinku (pomiędzy dwoma przystankami - kolejność ma znaczenie). Dla każdego odcinka wyliczane jest średnie opóźnienie.</p>
+
+                <p>Drugi moduł umożliwia analizę opóźnień na wybranym wariancie trasy wybranej linii. Wyświetlana jest cała wybrana trasa, a dla wszystkich jej przystanków wyliczany jest procent opóźnionych przyjazdów oraz średnie opóźnienie.</p>
+
+                <p>Każdy z modułów umożliwia filtrowanie danych po dniach tygodnia i przedziałach godzinowych. Każdy z modułów umożliwia także przełączenie w tryb wyświetlania przyspieszeń zamiast opóźnień.</p>
+
+                <p>Oba moduły intuicyjnie kolorują prezentowane dane w taki sposób, że kolor zielony oznacza brak opóźnień i stopniowo przechodzi do czerwonego lub czarnego dla coraz większych wartości opóźnień. Po kliknięciu na przystanek lub odcinek wyświetlany jest dymek, ze szczegółowymi danymi. Przystanek początkowy oznaczany jest kolorem zielonym, a końcowy czerwonym.</p>
+            </div>
+
+            <br/>
+            <div class="well" style="text-align: center;">
+                <a class="btn btn-default" href="sections.html" style="margin-right: 10px;">Analiza opóźnień i przyspieszeń na odcinkach</a>
+                <a class="btn btn-default" href="spdb.php" style="margin-left: 10px;">Analiza opóźnień i przyspieszeń na wybranej linii</a>
+            </div>
+
+            <br/>
+            <div style="text-align: center;">
+                <h4>Autorzy</h4>
+                <p>
+                    Maciej Bogdański<br />
+                    Krzysztof Falcman
+                </p>
+                <p>Semestr 16Z</p>
+            </div>
+        
         </main>
     </body>
 </html>
