@@ -130,9 +130,15 @@
                 clearInterval(timer);
             });
         } else {
-            $.getJSON("data/sections_delays.json", function(data) {
-                draw(data);
-            });
+            if(delay == 0) {
+                $.getJSON("data/sections_speedups.json", function(data) {
+                    draw(data);
+                });
+            } else {
+                $.getJSON("data/sections_delays.json", function(data) {
+                    draw(data);
+                });
+            }           
         }
     }
 
