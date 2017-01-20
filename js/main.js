@@ -29,7 +29,7 @@ function loadMarkers(data) {
 		var color = "rgb(255,255,255)";
 		if(data[i].avg_delay != null) {
 			dAvg = Math.floor(parseFloat(data[i].avg_delay)/60) + " min " + Math.floor(parseFloat(data[i].avg_delay)%60) + " sec";
-			color = numberToColorHsl(parseFloat(data[i].avg_delay), 0, 15 * 60);
+			color = numberToColorHsl(Math.abs(parseFloat(data[i].avg_delay)), 0, 15 * 60);
 		}
 		markers[i] = {coordinates: crd, delayRate: dRate, delayAvg: dAvg, stopName: data[i].name};
 		if(i > 0) // przesunięcie ponieważ rysuje linie inaczej niż byśmy chcieli

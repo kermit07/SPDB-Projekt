@@ -25,15 +25,37 @@
                         <a href="index.html">Powrót</a>
                     </div>
                     <div style="display: table-cell;">
-                        <label for="lineSelect">Linia:</label>
+                        <label for="lineSelect" style="margin-left: 20px;">Linia:</label>
                         <select id="lineSelect" onchange="onLineSelected(this.value)">
                             <option value="-1">Wybierz linię</option>
                         </select>
 
                         <label for="variantSelect" style="margin-left: 20px;">Wariant:</label>
-                        <select id="variantSelect" onchange="onVariantSelected(this.value)">
+                        <select id="variantSelect">
                             <option value="-1">Wybierz wariant</option>
                         </select>
+
+                        <label for="daySelect" style="margin-left: 20px;">Dzień tygodnia:</label>
+                        <select id="daySelect">
+                            <option value="-1">Wybierz dzień</option>
+                            <option value="1">Poniedziałek</option>
+                            <option value="2">Wtorek</option>
+                            <option value="3">Środa</option>
+                            <option value="4">Czwartek</option>
+                            <option value="5">Piątek</option>
+                            <option value="6">Sobota</option>
+                            <option value="0">Niedziela</option>
+                        </select>
+
+                        <label for="hourRangeSelect" style="margin-left: 20px;">Przedział godzinowy:</label>
+                        <select id="hourRangeSelect">
+                            <option value="-1">Wybierz przedział</option>
+                        </select>
+
+                        <label style="margin-left: 20px;"><input type="radio" name="delay" value="1" checked> Opóźnienia</label>
+                        <label style="margin-left: 5px;"><input type="radio" name="delay" value="0"> Przyspieszenia</label>
+
+                        <button type="button" onclick="loadData()" style="margin-left: 20px;">Załaduj dane</button>
                     </div>
                 </div>
             </div>
@@ -91,6 +113,16 @@
 <script>
     function init() {
 		loadLines();
+        setupHourRanges();
+    }
+
+    function setupHourRanges() {
+        for(var i = 0; i < 24; i = i + 2) {
+            $('#hourRangeSelect').append($('<option>', {
+                value: i,
+                text: i + ' - ' + (i+2)
+            }));
+        }
     }
 
     function loadLines() {
@@ -129,12 +161,17 @@
         }
     }
 
-    function onVariantSelected(variantLoid) {
+    function loadData() {
+        var startHour = parseInt($("#hourRangeSelect").val());
+        var day = parseInt($("#daySelect").val());
+        var delay = parseInt($('input[name=delay]:checked').val());
+        var variantLoid = parseInt($("#variantSelect").val());
+
         if(variantLoid != -1) {
             toggleLoader();
             var timer = startTimer();
-            $.get("variant.php", {variant_loid: variantLoid}, function(data) {
-                draw(data)
+            $.get("variant.php", {variant_loid: variantLoid, start_hour: startHour, end_hour: startHour+2, day: day, delay: delay}, function(data) {
+                draw(data);
                 toggleLoader();
                 clearInterval(timer);
             });
